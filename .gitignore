@@ -1,0 +1,14 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Local virtual environment
+.venv/
+
+# Keys and local config
+.env
+
+# Tools cache (tests and linter)
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
