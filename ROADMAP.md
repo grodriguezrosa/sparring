@@ -10,7 +10,13 @@ Goal: be able to do a voice Python interview with myself as soon as possible, ev
 - [x] Endpoint that generates the interview plan from the profile. `POST /interview-plan`. Tested end to end against real DeepSeek (job offer + CV → profile → plan, ~25 s for both calls).
 - [x] Endpoint that returns the signed URL for ElevenLabs. `POST /voice-session`. Tested against real ElevenLabs (restricted key, agent with auth enabled).
 - [ ] Minimal page: paste the job offer, upload the CV, start-interview button.
-- [ ] End-to-end voice interview working with DeepSeek as the model.
+- [x] Make the voice signed URL single-use (`include_conversation_id=true`): a plain signed URL can open several conversations for one quota unit (found in the ADR 0002 spike).
+- [ ] End-to-end voice interview working with DeepSeek as the model, via a custom LLM endpoint in FastAPI (`docs/decisions/0002-deliver-plan-through-custom-llm.md`):
+  - [x] `POST /voice-session` receives the plan and stores `conversation_id -> plan`.
+  - [ ] Streaming in the `LLMClient` port (DeepSeek).
+  - [ ] `POST /v1/chat/completions` for the agent: bearer auth, conversation lookup, interviewer prompt, SSE.
+  - [ ] Configure the real agent (custom LLM URL, secret, stub prompt) with a script.
+  - [ ] Measure latency with real DeepSeek and voice.
 
 Exit criterion: I complete a full Python interview with my own job offer and CV.
 

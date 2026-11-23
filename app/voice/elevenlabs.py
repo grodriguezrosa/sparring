@@ -1,7 +1,9 @@
+from urllib.parse import parse_qs, urlparse
+
 import httpx
 from pydantic import BaseModel, Field, SecretStr, ValidationError
 
-from app.voice.base import VoiceProviderError
+from app.voice.base import VoiceConversation, VoiceProviderError
 
 
 class _SignedUrlResponse(BaseModel):
@@ -42,9 +44,11 @@ class ElevenLabsVoice:
         self._timeout_s = timeout_s
         self._transport = transport  # tests only: lets us fake the server without network
 
-    async def create_signed_url(self) -> str:
+    async def create_conversation(self) -> VoiceConversation:
         headers = {"xi-api-key": self._api_key.get_secret_value()}
-        params = {"agent_id": self._agent_id}
+        # With include_conversation_id the URL carries the conversation id and is single-use.
+        # A plain signed URL can open any number of conversations during its 15 minutes.
+        params = {"agent_id": self._agent_id, "include_conversation_id": "true"}
 
         try:
             async with httpx.AsyncClient(
@@ -71,4 +75,9 @@ class ElevenLabsVoice:
             raise VoiceProviderError(
                 "ElevenLabs returned a response with an unexpected format"
             ) from error
-        return data.signed_url
+
+        conversation_ids = parse_qs(urlparse(data.signed_url).query).get("conversation_id", [])
+        if len(conversation_ids) != 1 or not conversation_ids[0]:
+            # Without it the URL would be reusable: refuse rather than hand it out.
+            raise VoiceProviderError("ElevenLabs returned a signed URL without a conversation_id")
+        return VoiceConversation(signed_url=data.signed_url, conversation_id=conversation_ids[0])

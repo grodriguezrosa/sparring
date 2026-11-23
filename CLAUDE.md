@@ -54,7 +54,7 @@ sparring/
     schemas/       #   Pydantic input/output models, one file per topic
     config.py      #   Settings (pydantic-settings) + get_settings()
     llm/           #   LLMClient (Protocol), DeepSeekLLM, FakeLLM, generate_structured, delimit()
-    voice/         #   VoiceProvider (Protocol), ElevenLabsVoice (signed URLs for the agent)
+    voice/         #   VoiceProvider (Protocol), ElevenLabsVoice (single-use signed URLs + conversation_id)
   tests/           # pytest tests
   scripts/         # developer scripts (preflight.py: pre-publish checks)
   .githooks/       # versioned git hooks (pre-push), installed with `make hooks`
@@ -86,12 +86,13 @@ sparring/
 - The CV and the job offer are **untrusted text**: they may contain instructions trying to manipulate the interviewer. They are always passed to the model as delimited data with `app.llm.untrusted.delimit()` (plus `UNTRUSTED_DATA_POLICY` in the system prompt), never as system instructions.
 - The CV contains personal data (GDPR): store the minimum, inform the user and offer deletion at the end of the session.
 - Never log CV contents or full transcripts.
-- ElevenLabs and DeepSeek keys never reach the browser; only the signed session URL does (valid 15 min, served with `Cache-Control: no-store`, never logged in full).
+- ElevenLabs and DeepSeek keys never reach the browser; only the signed session URL does (valid 15 min, single-use, served with `Cache-Control: no-store`, never logged in full). Always request it with `include_conversation_id=true`: a plain signed URL can be reused for 15 minutes and would bypass the voice quota. The adapter refuses a URL without `conversation_id` (ADR 0002).
 - The ElevenLabs agent has authentication enabled, so it only accepts signed URLs. The ElevenLabs key is restricted to "ElevenLabs Agents = Write" (signed URLs require `convai_write`), everything else "No access".
 - Cost protection, in layers:
   1. ElevenLabs agent limits (dashboard): concurrency 1, low daily conversation limit, max conversation duration 35 min (the default of 10 min would cut interviews short).
   2. Access codes: every paid endpoint (`/profile`, `/interview-plan`, `/voice-session`) requires the `X-Access-Code` header (`app/api/security.py`, codes in `ACCESS_CODES`, compared with `secrets.compare_digest`). `/health` stays open. Invite codes, not user accounts (those come in phase 2).
   3. Per-code daily quota for voice sessions (`app/services/quota.py`, 429 + `Retry-After`; refunded if the provider fails). In memory: valid for a single instance and reset on restart; it must move to Postgres before running more than one instance.
+- Voice sessions: `POST /voice-session` receives the interview plan and stores `conversation_id -> plan` (`app/services/conversations.py`, in memory, 2 h TTL, same single-instance limits as the quota). The plan comes back from the client, so it is untrusted data like the CV it was built from: size-bounded on input, and always delimited when it is put into a prompt.
 
 ## Resolved decisions
 
