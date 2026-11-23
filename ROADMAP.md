@@ -5,10 +5,10 @@
 Goal: be able to do a voice Python interview with myself as soon as possible, even if it's ugly.
 
 - [ ] Backend repository (FastAPI, this one) and a separate frontend repository (Next.js), each with its own `CLAUDE.md`.
-- [ ] Verify how to call Jev from Python (see open decisions in `CLAUDE.md`).
+- [x] Verify how to call Jev from Python. Yes: `POST /v1/decisions` on Vercel AI Gateway with httpx (`docs/decisions/0001-score-answers-with-jev.md`).
 - [x] Endpoint that receives job offer + CV text and returns a structured profile (DeepSeek). `POST /profile`. Tested against real DeepSeek (`deepseek-flash`): correct result with the sample job offer and CV.
-- [ ] Endpoint that generates the interview plan from the profile.
-- [ ] Endpoint that returns the signed token for ElevenLabs.
+- [x] Endpoint that generates the interview plan from the profile. `POST /interview-plan`. Tested end to end against real DeepSeek (job offer + CV → profile → plan, ~25 s for both calls).
+- [x] Endpoint that returns the signed URL for ElevenLabs. `POST /voice-session`. Tested against real ElevenLabs (restricted key, agent with auth enabled).
 - [ ] Minimal page: paste the job offer, upload the CV, start-interview button.
 - [ ] End-to-end voice interview working with DeepSeek as the model.
 
@@ -23,9 +23,12 @@ Goal: someone else can use it without me being there.
 - [ ] Final report: scores per criterion, fit with the offer, mistakes and model answers.
 - [ ] Text extraction from PDF and Word CVs.
 - [ ] Protection against instructions injected in the CV and the job offer.
-- [ ] Persistence of sessions and reports in Postgres.
+- [ ] Choose the cloud for the database (AWS RDS or Google Cloud SQL, free offers; see open decisions in `CLAUDE.md`), in an EU region, with a budget alert.
+- [ ] Persistence of sessions and reports in Postgres (repository port + Postgres adapter; Postgres in Docker for local development).
 - [ ] Data deletion at the end of the session and privacy notice (GDPR).
-- [ ] Deployment: frontend on Vercel, backend in a container.
+- [x] Protect the paid endpoints: ElevenLabs agent limits, access codes (`X-Access-Code`) and a per-code daily voice quota.
+- [ ] Move the voice quota from memory to Postgres (needed before running more than one backend instance).
+- [ ] Deployment: frontend on Vercel, backend in a container (preferably on the same cloud as the database).
 - [ ] Tests for the main endpoints.
 
 Exit criterion: 3 or 4 different people complete an interview and find the report useful.

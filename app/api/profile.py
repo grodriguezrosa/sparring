@@ -3,11 +3,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from app.api.deps import get_llm
+from app.api.security import require_access_code
 from app.llm.base import LLMClient
 from app.schemas.profile import Profile, ProfileRequest
 from app.services.profile import analyze_job_offer_and_cv
 
-router = APIRouter(tags=["profile"])
+router = APIRouter(tags=["profile"], dependencies=[Depends(require_access_code)])
 
 
 @router.post("/profile")

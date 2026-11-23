@@ -1,13 +1,10 @@
 import json
-from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from pydantic import ValidationError
 
 from app.api.deps import get_llm
-from app.config import get_settings
 from app.llm.base import LLMClient, LLMProviderError
 from app.llm.fake import FakeLLM
 from app.llm.untrusted import TAG, UNTRUSTED_DATA_POLICY
@@ -48,12 +45,6 @@ class DownLLM:
 
     async def complete(self, *, system: str, user: str, json_mode: bool = False) -> str:
         raise LLMProviderError("DeepSeek is not answering")
-
-
-@pytest.fixture
-def client() -> Iterator[TestClient]:
-    yield TestClient(app)
-    app.dependency_overrides.clear()  # so one test does not leak into the next
 
 
 def use_llm(llm: LLMClient) -> None:
@@ -131,11 +122,6 @@ def test_provider_down_returns_503(client: TestClient) -> None:
 
 @pytest.mark.live
 def test_live_profile_with_deepseek(client: TestClient) -> None:
-    try:
-        get_settings()
-    except ValidationError:
-        pytest.skip("DEEPSEEK_API_KEY is missing from .env")
-
     response = client.post("/profile", json={"job_offer": JOB_OFFER, "cv": CV})
 
     assert response.status_code == 200, response.text

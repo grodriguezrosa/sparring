@@ -1,0 +1,45 @@
+from collections.abc import Iterator
+
+import pytest
+from fastapi.testclient import TestClient
+from pydantic import SecretStr, ValidationError
+
+from app.api.deps import get_voice_quota
+from app.config import Settings, get_settings
+from app.main import app
+from app.services.quota import DailyQuota
+
+TEST_ACCESS_CODE = "test-access-code-0123456789"
+TEST_VOICE_LIMIT = 3
+
+
+def make_test_settings() -> Settings:
+    return Settings(
+        deepseek_api_key=SecretStr("test-deepseek-key"),
+        elevenlabs_api_key=SecretStr("test-elevenlabs-key"),
+        elevenlabs_agent_id="agent_test",
+        access_codes=[SecretStr(TEST_ACCESS_CODE)],
+    )
+
+
+@pytest.fixture
+def client(request: pytest.FixtureRequest) -> Iterator[TestClient]:
+    """A test client that already sends a valid access code.
+
+    Normal tests get fake settings and a fresh voice quota. Tests marked `live` use the
+    real .env (and its first access code), and are skipped if it is incomplete.
+    """
+    if request.node.get_closest_marker("live"):
+        try:
+            settings = get_settings()
+        except ValidationError:
+            pytest.skip("Required variables are missing from .env")
+    else:
+        settings = make_test_settings()
+        quota = DailyQuota(limit_per_day=TEST_VOICE_LIMIT)
+        app.dependency_overrides[get_settings] = lambda: settings
+        app.dependency_overrides[get_voice_quota] = lambda: quota
+
+    access_code = settings.access_codes[0].get_secret_value()
+    yield TestClient(app, headers={"X-Access-Code": access_code})
+    app.dependency_overrides.clear()  # so one test does not leak into the next
