@@ -1,0 +1,22 @@
+Backend Developer Python (Mid) - Fintech, Madrid (hybrid)
+
+We are looking for a backend developer to join our payments team.
+
+Responsibilities:
+- Design and maintain REST APIs with FastAPI.
+- Model data and optimize queries in PostgreSQL.
+- Write automated tests and take part in code reviews.
+- Deploy services in containers (Docker) on AWS.
+
+Must-have requirements:
+- 3+ years of experience with Python.
+- Experience with FastAPI or Django REST Framework.
+- SQL and PostgreSQL.
+- Testing with pytest.
+- Git.
+
+Nice to have:
+- Docker and Kubernetes.
+- AWS experience.
+- Asynchronous programming (asyncio).
+- English B2.

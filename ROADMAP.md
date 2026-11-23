@@ -1,53 +1,53 @@
-# Roadmap de Sparring
+# Sparring roadmap
 
-## Fase 0: Prototipo para uso propio
+## Phase 0: Prototype for personal use
 
-Objetivo: poder hacerme una entrevista de Python con voz cuanto antes, aunque sea feo.
+Goal: be able to do a voice Python interview with myself as soon as possible, even if it's ugly.
 
-- [ ] Repositorio del backend (FastAPI, este) y repositorio aparte del frontend (Next.js), cada uno con su `CLAUDE.md`.
-- [ ] Verificar cómo llamar a Jev desde Python (ver decisiones abiertas en `CLAUDE.md`).
-- [ ] Endpoint que recibe texto de oferta + CV y devuelve un perfil estructurado (DeepSeek).
-- [ ] Endpoint que genera el plan de entrevista a partir del perfil.
-- [ ] Endpoint que entrega el token firmado para ElevenLabs.
-- [ ] Página mínima: pegar oferta, subir CV, botón de empezar entrevista.
-- [ ] Entrevista por voz funcionando de extremo a extremo con DeepSeek como modelo.
+- [ ] Backend repository (FastAPI, this one) and a separate frontend repository (Next.js), each with its own `CLAUDE.md`.
+- [ ] Verify how to call Jev from Python (see open decisions in `CLAUDE.md`).
+- [x] Endpoint that receives job offer + CV text and returns a structured profile (DeepSeek). `POST /profile`. Tested against real DeepSeek (`deepseek-flash`): correct result with the sample job offer and CV.
+- [ ] Endpoint that generates the interview plan from the profile.
+- [ ] Endpoint that returns the signed token for ElevenLabs.
+- [ ] Minimal page: paste the job offer, upload the CV, start-interview button.
+- [ ] End-to-end voice interview working with DeepSeek as the model.
 
-Criterio de salida: hago una entrevista completa de Python con mi oferta y mi CV.
+Exit criterion: I complete a full Python interview with my own job offer and CV.
 
-## Fase 1: MVP
+## Phase 1: MVP
 
-Objetivo: que otra persona pueda usarlo sin que yo esté delante.
+Goal: someone else can use it without me being there.
 
-- [ ] Rúbrica derivada de la oferta y puntuación de cada respuesta (Jev o alternativa).
-- [ ] Decisión de repreguntar o avanzar según la puntuación.
-- [ ] Informe final: notas por criterio, encaje con la oferta, fallos y respuestas modelo.
-- [ ] Extracción de texto de CV en PDF y Word.
-- [ ] Protección frente a instrucciones inyectadas en CV y oferta.
-- [ ] Persistencia de sesiones e informes en Postgres.
-- [ ] Borrado de datos al terminar la sesión y aviso de privacidad (RGPD).
-- [ ] Despliegue: frontend en Vercel, backend en contenedor.
-- [ ] Tests de los endpoints principales.
+- [ ] Rubric derived from the job offer and scoring of each answer (Jev or alternative).
+- [ ] Decide whether to follow up or move on based on the score.
+- [ ] Final report: scores per criterion, fit with the offer, mistakes and model answers.
+- [ ] Text extraction from PDF and Word CVs.
+- [ ] Protection against instructions injected in the CV and the job offer.
+- [ ] Persistence of sessions and reports in Postgres.
+- [ ] Data deletion at the end of the session and privacy notice (GDPR).
+- [ ] Deployment: frontend on Vercel, backend in a container.
+- [ ] Tests for the main endpoints.
 
-Criterio de salida: 3 o 4 personas distintas completan una entrevista y el informe les resulta útil.
+Exit criterion: 3 or 4 different people complete an interview and find the report useful.
 
-## Fase 2: Siguiente hito
+## Phase 2: Next milestone
 
-- [ ] Varias ofertas y CVs por usuario, para preparar procesos en paralelo.
-- [ ] Cuentas de usuario.
-- [ ] Editor de código en vivo durante la entrevista (ejercicios de Python).
-- [ ] Historial de sesiones y progreso.
+- [ ] Multiple job offers and CVs per user, to prepare several processes in parallel.
+- [ ] User accounts.
+- [ ] Live code editor during the interview (Python exercises).
+- [ ] Session history and progress.
 
-## Fase 3: Crecimiento
+## Phase 3: Growth
 
-- [ ] Detección de lagunas recurrentes y sesiones de repaso sugeridas.
-- [ ] Inglés y otros idiomas.
-- [ ] Modelo de pago y límites de uso.
-- [ ] Posible oferta para academias y empresas.
+- [ ] Detection of recurring gaps and suggested review sessions.
+- [ ] English and other languages.
+- [ ] Pricing model and usage limits.
+- [ ] Possible offering for academies and companies.
 
-## Riesgos a vigilar
+## Risks to watch
 
-- **Latencia de la voz:** la respuesta debe llegar en 1-2 segundos o deja de parecer una entrevista.
-- **Coste por minuto:** la voz es lo más caro; calcularlo antes de fijar precios.
-- **Fiabilidad de las puntuaciones:** contrastarlas con juicio humano antes de mostrarlas como definitivas.
-- **Privacidad:** CVs y transcripciones son datos personales.
-- **Nombre:** comprobar dominio y marca (EUIPO) para "Sparring" antes de invertir en branding.
+- **Voice latency:** the response must arrive within 1-2 seconds or it stops feeling like an interview.
+- **Cost per minute:** voice is the most expensive part; calculate it before setting prices.
+- **Score reliability:** compare scores with human judgement before presenting them as final.
+- **Privacy:** CVs and transcripts are personal data.
+- **Name:** check the domain and trademark (EUIPO) for "Sparring" before investing in branding.

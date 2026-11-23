@@ -1,0 +1,12 @@
+Laura Example - Python Developer (fictional CV for tests)
+
+Experience:
+- 2022-present: Backend developer at Online Shop Ltd.
+  REST APIs with Django REST Framework, PostgreSQL, background tasks with Celery.
+  Tests with pytest (80 % coverage). Deployment with Docker.
+- 2020-2022: Junior developer at Web Agency.
+  Python automation scripts and maintenance of a Flask website.
+
+Education: BSc in Computer Engineering.
+Languages: English B1.
+Tools: Git, Docker, Linux.
