@@ -1,0 +1,79 @@
+{
+  "role": "Backend Developer Python (Mid) - Fintech",
+  "level": "mid",
+  "stack": [
+    "Python",
+    "FastAPI",
+    "Django REST Framework",
+    "PostgreSQL",
+    "pytest",
+    "Git",
+    "Docker",
+    "Kubernetes",
+    "AWS",
+    "asyncio"
+  ],
+  "responsibilities": [
+    "Design and maintain REST APIs with FastAPI",
+    "Model data and optimize queries in PostgreSQL",
+    "Write automated tests and take part in code reviews",
+    "Deploy services in containers (Docker) on AWS"
+  ],
+  "requirements": [
+    {
+      "description": "3+ years of experience with Python",
+      "mandatory": true,
+      "cv_coverage": "yes",
+      "cv_evidence": "2022-present: Backend developer at Online Shop Ltd."
+    },
+    {
+      "description": "Experience with FastAPI or Django REST Framework",
+      "mandatory": true,
+      "cv_coverage": "yes",
+      "cv_evidence": "REST APIs with Django REST Framework, PostgreSQL, background tasks with Celery."
+    },
+    {
+      "description": "SQL and PostgreSQL",
+      "mandatory": true,
+      "cv_coverage": "yes",
+      "cv_evidence": "REST APIs with Django REST Framework, PostgreSQL, background tasks with Celery."
+    },
+    {
+      "description": "Testing with pytest",
+      "mandatory": true,
+      "cv_coverage": "yes",
+      "cv_evidence": "Tests with pytest (80 % coverage)."
+    },
+    {
+      "description": "Git",
+      "mandatory": true,
+      "cv_coverage": "yes",
+      "cv_evidence": "Tools: Git, Docker, Linux."
+    },
+    {
+      "description": "Docker and Kubernetes",
+      "mandatory": false,
+      "cv_coverage": "partial",
+      "cv_evidence": "Deployment with Docker."
+    },
+    {
+      "description": "AWS experience",
+      "mandatory": false,
+      "cv_coverage": "no",
+      "cv_evidence": null
+    },
+    {
+      "description": "Asynchronous programming (asyncio)",
+      "mandatory": false,
+      "cv_coverage": "no",
+      "cv_evidence": null
+    },
+    {
+      "description": "English B2",
+      "mandatory": false,
+      "cv_coverage": "partial",
+      "cv_evidence": "Languages: English B1."
+    }
+  ],
+  "candidate_summary": "Laura meets every mandatory requirement. Among the nice-to-haves she only shows Docker; AWS and asyncio are missing and her English is B1."
+}

@@ -1,0 +1,5 @@
+#!/bin/sh
+# Runs the pre-publish checks (scripts/preflight.py) before every `git push`.
+# Install once per clone with: make hooks
+# Emergency skip (CI still checks): git push --no-verify
+exec uv run --quiet python scripts/preflight.py --pre-push
