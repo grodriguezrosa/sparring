@@ -53,7 +53,7 @@ sparring/
     services/      #   business logic (prompts, orchestration); routers only call it
     schemas/       #   Pydantic input/output models, one file per topic
     config.py      #   Settings (pydantic-settings) + get_settings()
-    llm/           #   LLMClient (Protocol), DeepSeekLLM, FakeLLM, generate_structured, delimit()
+    llm/           #   LLMClient (Protocol: complete + stream), DeepSeekLLM, FakeLLM, generate_structured, delimit()
     voice/         #   VoiceProvider (Protocol), ElevenLabsVoice (single-use signed URLs + conversation_id)
   tests/           # pytest tests
   scripts/         # developer scripts (preflight.py: pre-publish checks)

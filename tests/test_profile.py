@@ -1,11 +1,12 @@
 import json
+from collections.abc import AsyncIterator, Sequence
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
 from app.api.deps import get_llm
-from app.llm.base import LLMClient, LLMProviderError
+from app.llm.base import ChatMessage, LLMClient, LLMProviderError
 from app.llm.fake import FakeLLM
 from app.llm.untrusted import TAG, UNTRUSTED_DATA_POLICY
 from app.main import app
@@ -45,6 +46,10 @@ class DownLLM:
 
     async def complete(self, *, system: str, user: str, json_mode: bool = False) -> str:
         raise LLMProviderError("DeepSeek is not answering")
+
+    async def stream(self, *, messages: Sequence[ChatMessage]) -> AsyncIterator[str]:
+        raise LLMProviderError("DeepSeek is not answering")
+        yield ""  # never reached; the `yield` is what makes this an async generator
 
 
 def use_llm(llm: LLMClient) -> None:
