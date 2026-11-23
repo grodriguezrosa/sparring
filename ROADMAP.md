@@ -15,7 +15,7 @@ Goal: be able to do a voice Python interview with myself as soon as possible, ev
   - [x] `POST /voice-session` receives the plan and stores `conversation_id -> plan`.
   - [x] Streaming in the `LLMClient` port (DeepSeek). Live: first text chunk after 0.7-1.2 s with `deepseek-flash`.
   - [x] `POST /v1/chat/completions` for the agent: bearer auth, conversation lookup, interviewer prompt, SSE. Live with real DeepSeek: opens with the plan intro and the first question in Spanish (~1.4-1.7 s).
-  - [ ] Configure the real agent (custom LLM URL, secret, stub prompt) with a script.
+  - [x] Configure the real agent (custom LLM URL, secret, stub prompt) with a script (`make agent-config`). Verified end to end with a typed interview through the real agent (`make interview`).
   - [ ] Measure latency with real DeepSeek and voice.
 
 Exit criterion: I complete a full Python interview with my own job offer and CV.

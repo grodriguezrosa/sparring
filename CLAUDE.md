@@ -69,6 +69,11 @@ sparring/
 - `make test-live`: tests marked `@pytest.mark.live` against real APIs (need `.env`, cost money; never in CI).
 - `make preflight`: pre-publish checks for the checked-out branch (`scripts/preflight.py`): branch name (`<type>/<name>`, no direct pushes to `master`/`main`), no forbidden files (`.env`, `lessons/`, `CLAUDE.local.md`, keys), no secrets in any commit being pushed (known key formats and the values in `.env`), no files over 1 MB, clean working tree, `uv lock --check` and `make check`.
 - `make hooks`: once per clone; sets `core.hooksPath=.githooks` so `git push` runs the preflight automatically. Skip only in an emergency with `git push --no-verify`.
+- Voice interview in development (the agent needs a public URL for our custom LLM endpoint):
+  1. `make dev` and, in another terminal, `make tunnel` (cloudflared quick tunnel; prints a new `https://*.trycloudflare.com` URL each time).
+  2. `make agent-config URL=<tunnel URL>`: points the real ElevenLabs agent at it (`scripts/configure_agent.py`: backs up the agent to `backups/`, changes only the managed fields, verifies limits/voice/tools are unchanged; `--restore <backup>` undoes it).
+  3. `make interview`: typed interview through the real agent (`scripts/text_interview.py`; uses one conversation of the agent's daily limit).
+  Quick tunnels die after a while or a network pause ("Tunnel not found"): start a new one and run `make agent-config` again.
 
 ## Backend conventions
 

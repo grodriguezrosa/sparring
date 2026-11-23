@@ -1,5 +1,5 @@
 # Project shortcuts. Usage: make <target>   (for example: make check)
-.PHONY: install dev lint format typecheck test test-live check preflight hooks
+.PHONY: install dev lint format typecheck test test-live check preflight hooks tunnel agent-config interview
 
 install:  ## Install the exact dependencies from uv.lock
 	uv sync
@@ -32,3 +32,15 @@ preflight:  ## Pre-publish checks for the checked-out branch (the pre-push hook 
 
 hooks:  ## Install the git hooks in .githooks/ (pre-push runs the preflight checks)
 	git config core.hooksPath .githooks
+
+# --- Voice interview in development (ADR 0002) ---------------------------------------
+
+tunnel:  ## Public https URL for `make dev` (prints a new trycloudflare.com URL every time)
+	cloudflared tunnel --no-autoupdate --url http://localhost:8000
+
+agent-config:  ## Point the ElevenLabs agent at the tunnel: make agent-config URL=https://...
+	@test -n "$(URL)" || (echo "Usage: make agent-config URL=https://xxx.trycloudflare.com" && exit 1)
+	uv run python -m scripts.configure_agent --llm-url $(URL)
+
+interview:  ## Typed interview through the real agent (uses 1 conversation of the daily limit)
+	uv run python -m scripts.text_interview
