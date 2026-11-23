@@ -49,7 +49,7 @@ sparring/
   uv.lock          # exact versions, committed to git
   app/             # application code
     main.py        #   creates the app and mounts routers (no endpoints)
-    api/           #   one router (APIRouter) per topic; deps.py (get_llm...), errors.py (provider errors -> 502/503), security.py (access codes)
+    api/           #   one router (APIRouter) per topic (agent_llm.py: custom LLM for the voice agent); deps.py (get_llm...), errors.py (provider errors -> 502/503), security.py (access codes)
     services/      #   business logic (prompts, orchestration); routers only call it
     schemas/       #   Pydantic input/output models, one file per topic
     config.py      #   Settings (pydantic-settings) + get_settings()
@@ -93,6 +93,7 @@ sparring/
   2. Access codes: every paid endpoint (`/profile`, `/interview-plan`, `/voice-session`) requires the `X-Access-Code` header (`app/api/security.py`, codes in `ACCESS_CODES`, compared with `secrets.compare_digest`). `/health` stays open. Invite codes, not user accounts (those come in phase 2).
   3. Per-code daily quota for voice sessions (`app/services/quota.py`, 429 + `Retry-After`; refunded if the provider fails). In memory: valid for a single instance and reset on restart; it must move to Postgres before running more than one instance.
 - Voice sessions: `POST /voice-session` receives the interview plan and stores `conversation_id -> plan` (`app/services/conversations.py`, in memory, 2 h TTL, same single-instance limits as the quota). The plan comes back from the client, so it is untrusted data like the CV it was built from: size-bounded on input, and always delimited when it is put into a prompt.
+- Voice turns: the ElevenLabs agent uses `POST /v1/chat/completions` (`app/api/agent_llm.py`) as its custom LLM. It is authenticated with `AGENT_LLM_SECRET` as a Bearer token (not with access codes), finds the conversation through the `<conversation_id>{{system__conversation_id}}</conversation_id>` marker in the agent's stub prompt (`AGENT_PROMPT_STUB`), returns 404 for unknown conversations, replaces ElevenLabs' system prompt with ours (`app/services/interviewer.py`, plan delimited, scoring signals excluded) and streams DeepSeek's reply as OpenAI SSE chunks.
 
 ## Resolved decisions
 

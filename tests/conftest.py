@@ -12,6 +12,7 @@ from app.services.quota import DailyQuota
 
 TEST_ACCESS_CODE = "test-access-code-0123456789"
 TEST_VOICE_LIMIT = 3
+TEST_AGENT_LLM_SECRET = "test-agent-llm-secret-0123456789abcdef"  # noqa: S105  (fake, tests only)
 
 
 def make_test_settings() -> Settings:
@@ -19,6 +20,7 @@ def make_test_settings() -> Settings:
         deepseek_api_key=SecretStr("test-deepseek-key"),
         elevenlabs_api_key=SecretStr("test-elevenlabs-key"),
         elevenlabs_agent_id="agent_test",
+        agent_llm_secret=SecretStr(TEST_AGENT_LLM_SECRET),
         access_codes=[SecretStr(TEST_ACCESS_CODE)],
     )
 

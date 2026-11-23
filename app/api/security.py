@@ -24,6 +24,22 @@ def require_access_code(
     return hashlib.sha256(x_access_code.encode()).hexdigest()[:16]
 
 
+def require_agent_llm_secret(
+    settings: Annotated[Settings, Depends(get_settings)],
+    authorization: Annotated[str | None, Header()] = None,
+) -> None:
+    """Only ElevenLabs may call the custom LLM endpoint: it sends our secret as a Bearer token."""
+    expected = f"Bearer {settings.agent_llm_secret.get_secret_value()}"
+    if authorization is None or not secrets.compare_digest(
+        authorization.encode(), expected.encode()
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing or invalid agent secret.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
 def _is_valid(candidate: str, settings: Settings) -> bool:
     # compare_digest takes the same time wherever the first difference is, so response
     # times do not reveal how much of a guessed code was right.

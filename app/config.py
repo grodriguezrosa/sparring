@@ -5,6 +5,7 @@ from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 MIN_ACCESS_CODE_LENGTH = 16
+MIN_AGENT_LLM_SECRET_LENGTH = 32
 
 
 class Settings(BaseSettings):
@@ -17,6 +18,9 @@ class Settings(BaseSettings):
     elevenlabs_api_key: SecretStr
     elevenlabs_agent_id: str
     elevenlabs_base_url: str = "https://api.elevenlabs.io"
+    # Shared secret ElevenLabs sends (as a Bearer token) when it calls our custom LLM
+    # endpoint. Stored in ElevenLabs as a workspace secret.
+    agent_llm_secret: SecretStr
 
     # Comma-separated in .env: ACCESS_CODES=code-for-me,code-for-tester-1
     access_codes: Annotated[list[SecretStr], NoDecode] = Field(min_length=1)
@@ -37,6 +41,13 @@ class Settings(BaseSettings):
                 f"every access code needs at least {MIN_ACCESS_CODE_LENGTH} characters"
             )
         return codes
+
+    @field_validator("agent_llm_secret")
+    @classmethod
+    def agent_llm_secret_is_long_enough(cls, secret: SecretStr) -> SecretStr:
+        if len(secret.get_secret_value()) < MIN_AGENT_LLM_SECRET_LENGTH:
+            raise ValueError(f"needs at least {MIN_AGENT_LLM_SECRET_LENGTH} characters")
+        return secret
 
 
 @lru_cache

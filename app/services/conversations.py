@@ -50,6 +50,10 @@ class ConversationStore:
             return None
         return session
 
+    def now(self) -> datetime:
+        """The store's clock, so callers measure elapsed time the same way it does."""
+        return self._clock()
+
     def __len__(self) -> int:
         return len(self._sessions)
 

@@ -14,7 +14,7 @@ Goal: be able to do a voice Python interview with myself as soon as possible, ev
 - [ ] End-to-end voice interview working with DeepSeek as the model, via a custom LLM endpoint in FastAPI (`docs/decisions/0002-deliver-plan-through-custom-llm.md`):
   - [x] `POST /voice-session` receives the plan and stores `conversation_id -> plan`.
   - [x] Streaming in the `LLMClient` port (DeepSeek). Live: first text chunk after 0.7-1.2 s with `deepseek-flash`.
-  - [ ] `POST /v1/chat/completions` for the agent: bearer auth, conversation lookup, interviewer prompt, SSE.
+  - [x] `POST /v1/chat/completions` for the agent: bearer auth, conversation lookup, interviewer prompt, SSE. Live with real DeepSeek: opens with the plan intro and the first question in Spanish (~1.4-1.7 s).
   - [ ] Configure the real agent (custom LLM URL, secret, stub prompt) with a script.
   - [ ] Measure latency with real DeepSeek and voice.
 
