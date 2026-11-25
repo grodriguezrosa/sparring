@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field, model_validator
 from app.schemas.profile import Profile
 
 MAX_PROFILE_CHARS = 40_000
+MAX_PLAN_CHARS = 40_000
 
 type Focus = Literal["verify_claim", "explore_gap", "core_skill"]
 type Importance = Literal["high", "medium", "low"]
@@ -64,4 +65,4 @@ class InterviewTopic(PlannedTopic):
 class InterviewPlan(BaseModel):
     intro: str
     duration_minutes: int
-    topics: list[InterviewTopic]
+    topics: list[InterviewTopic] = Field(min_length=1)

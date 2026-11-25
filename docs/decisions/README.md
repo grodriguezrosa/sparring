@@ -5,6 +5,7 @@ One file per significant decision: what was decided, why, and what it costs. Rec
 | # | Decision | Status |
 |---|---|---|
 | [0001](0001-score-answers-with-jev.md) | Score interview answers with Jev, called from FastAPI | Accepted |
+| [0002](0002-deliver-plan-through-custom-llm.md) | Deliver the interview plan to the voice agent through a custom LLM endpoint | Accepted |
 
 ## Writing a new record
 

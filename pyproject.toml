@@ -11,9 +11,16 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "elevenlabs>=2.79.0",
     "mypy>=2.4.1",
     "pytest>=9.2.0",
     "ruff>=0.17.6",
+    "websockets>=17.4",
+]
+# Microphone/speaker for scripts/voice_interview.py only. Not in `dev` because pyaudio
+# compiles against PortAudio (`brew install portaudio`), which CI runners do not have.
+voice = [
+    "pyaudio>=0.2.14",
 ]
 
 [tool.ruff]
@@ -31,6 +38,12 @@ python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
 files = ["app", "tests", "scripts"]
+
+[[tool.mypy.overrides]]
+# The ElevenLabs SDK leaves some functions untyped (start_session, DefaultAudioInterface...).
+# Only this development script calls them.
+module = "scripts.voice_interview"
+disallow_untyped_calls = false
 
 [tool.pyright]
 venvPath = "."

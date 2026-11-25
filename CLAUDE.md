@@ -49,12 +49,12 @@ sparring/
   uv.lock          # exact versions, committed to git
   app/             # application code
     main.py        #   creates the app and mounts routers (no endpoints)
-    api/           #   one router (APIRouter) per topic; deps.py (get_llm...), errors.py (provider errors -> 502/503), security.py (access codes)
+    api/           #   one router (APIRouter) per topic (agent_llm.py: custom LLM for the voice agent); deps.py (get_llm...), errors.py (provider errors -> 502/503), security.py (access codes)
     services/      #   business logic (prompts, orchestration); routers only call it
     schemas/       #   Pydantic input/output models, one file per topic
     config.py      #   Settings (pydantic-settings) + get_settings()
-    llm/           #   LLMClient (Protocol), DeepSeekLLM, FakeLLM, generate_structured, delimit()
-    voice/         #   VoiceProvider (Protocol), ElevenLabsVoice (signed URLs for the agent)
+    llm/           #   LLMClient (Protocol: complete + stream), DeepSeekLLM, FakeLLM, generate_structured, delimit()
+    voice/         #   VoiceProvider (Protocol), ElevenLabsVoice (single-use signed URLs + conversation_id)
   tests/           # pytest tests
   scripts/         # developer scripts (preflight.py: pre-publish checks)
   .githooks/       # versioned git hooks (pre-push), installed with `make hooks`
@@ -69,6 +69,11 @@ sparring/
 - `make test-live`: tests marked `@pytest.mark.live` against real APIs (need `.env`, cost money; never in CI).
 - `make preflight`: pre-publish checks for the checked-out branch (`scripts/preflight.py`): branch name (`<type>/<name>`, no direct pushes to `master`/`main`), no forbidden files (`.env`, `lessons/`, `CLAUDE.local.md`, keys), no secrets in any commit being pushed (known key formats and the values in `.env`), no files over 1 MB, clean working tree, `uv lock --check` and `make check`.
 - `make hooks`: once per clone; sets `core.hooksPath=.githooks` so `git push` runs the preflight automatically. Skip only in an emergency with `git push --no-verify`.
+- Voice interview in development (the agent needs a public URL for our custom LLM endpoint):
+  1. `make dev` and, in another terminal, `make tunnel` (cloudflared quick tunnel; prints a new `https://*.trycloudflare.com` URL each time).
+  2. `make agent-config URL=<tunnel URL>`: points the real ElevenLabs agent at it (`scripts/configure_agent.py`: backs up the agent to `backups/`, changes only the managed fields, verifies limits/voice/tools are unchanged; `--restore <backup>` undoes it).
+  3. `make interview`: typed interview through the real agent (`scripts/text_interview.py`; uses one conversation of the agent's daily limit).
+  Quick tunnels die after a while or a network pause ("Tunnel not found"): start a new one and run `make agent-config` again.
 
 ## Backend conventions
 
@@ -86,12 +91,14 @@ sparring/
 - The CV and the job offer are **untrusted text**: they may contain instructions trying to manipulate the interviewer. They are always passed to the model as delimited data with `app.llm.untrusted.delimit()` (plus `UNTRUSTED_DATA_POLICY` in the system prompt), never as system instructions.
 - The CV contains personal data (GDPR): store the minimum, inform the user and offer deletion at the end of the session.
 - Never log CV contents or full transcripts.
-- ElevenLabs and DeepSeek keys never reach the browser; only the signed session URL does (valid 15 min, served with `Cache-Control: no-store`, never logged in full).
+- ElevenLabs and DeepSeek keys never reach the browser; only the signed session URL does (valid 15 min, single-use, served with `Cache-Control: no-store`, never logged in full). Always request it with `include_conversation_id=true`: a plain signed URL can be reused for 15 minutes and would bypass the voice quota. The adapter refuses a URL without `conversation_id` (ADR 0002).
 - The ElevenLabs agent has authentication enabled, so it only accepts signed URLs. The ElevenLabs key is restricted to "ElevenLabs Agents = Write" (signed URLs require `convai_write`), everything else "No access".
 - Cost protection, in layers:
   1. ElevenLabs agent limits (dashboard): concurrency 1, low daily conversation limit, max conversation duration 35 min (the default of 10 min would cut interviews short).
   2. Access codes: every paid endpoint (`/profile`, `/interview-plan`, `/voice-session`) requires the `X-Access-Code` header (`app/api/security.py`, codes in `ACCESS_CODES`, compared with `secrets.compare_digest`). `/health` stays open. Invite codes, not user accounts (those come in phase 2).
   3. Per-code daily quota for voice sessions (`app/services/quota.py`, 429 + `Retry-After`; refunded if the provider fails). In memory: valid for a single instance and reset on restart; it must move to Postgres before running more than one instance.
+- Voice sessions: `POST /voice-session` receives the interview plan and stores `conversation_id -> plan` (`app/services/conversations.py`, in memory, 2 h TTL, same single-instance limits as the quota). The plan comes back from the client, so it is untrusted data like the CV it was built from: size-bounded on input, and always delimited when it is put into a prompt.
+- Voice turns: the ElevenLabs agent uses `POST /v1/chat/completions` (`app/api/agent_llm.py`) as its custom LLM. It is authenticated with `AGENT_LLM_SECRET` as a Bearer token (not with access codes), finds the conversation through the `<conversation_id>{{system__conversation_id}}</conversation_id>` marker in the agent's stub prompt (`AGENT_PROMPT_STUB`), returns 404 for unknown conversations, replaces ElevenLabs' system prompt with ours (`app/services/interviewer.py`, plan delimited, scoring signals excluded) and streams DeepSeek's reply as OpenAI SSE chunks.
 
 ## Resolved decisions
 

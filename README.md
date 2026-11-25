@@ -12,7 +12,7 @@ The user provides **the job offer** and **their CV**. From both, the app:
 
 This repository contains **only the backend** (FastAPI). The frontend (Next.js) lives in a separate repository.
 
-> **Status:** work in progress (phase 0 of the [roadmap](ROADMAP.md)). The project foundation is in place (configuration, DeepSeek client, tests and CI); endpoints: `GET /health`, `POST /profile` (job offer + CV as text → structured profile) `POST /interview-plan` (profile → interview plan with topics, questions and time per topic) and `POST /voice-session` (signed URL for the browser to talk to the ElevenLabs agent).
+> **Status:** work in progress (phase 0 of the [roadmap](ROADMAP.md)). The project foundation is in place (configuration, DeepSeek client, tests and CI); endpoints: `GET /health`, `POST /profile` (job offer + CV as text → structured profile) `POST /interview-plan` (profile → interview plan with topics, questions and time per topic) `POST /voice-session` (interview plan → single-use signed URL for the browser to talk to the ElevenLabs agent) and `POST /v1/chat/completions` (custom LLM endpoint the ElevenLabs agent calls on every turn; streams the interviewer's reply).
 
 ## Architecture
 
@@ -52,7 +52,7 @@ cp .env.example .env   # then fill in the keys
 make dev               # development server with auto-reload
 ```
 
-Every endpoint except `/health` requires an access code in the `X-Access-Code` header (one of the `ACCESS_CODES` in `.env`). In `/docs`, fill it in on each request.
+Every endpoint except `/health` and `/v1/chat/completions` requires an access code in the `X-Access-Code` header (one of the `ACCESS_CODES` in `.env`). In `/docs`, fill it in on each request. `/v1/chat/completions` is only for the ElevenLabs agent and requires `Authorization: Bearer <AGENT_LLM_SECRET>`.
 
 With the server running:
 
