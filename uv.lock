@@ -1639,10 +1639,12 @@ dependencies = [
 dev = [
     { name = "elevenlabs" },
     { name = "mypy" },
-    { name = "pyaudio" },
     { name = "pytest" },
     { name = "ruff" },
     { name = "websockets" },
+]
+voice = [
+    { name = "pyaudio" },
 ]
 
 [package.metadata]
@@ -1656,11 +1658,11 @@ requires-dist = [
 dev = [
     { name = "elevenlabs", specifier = ">=2.79.0" },
     { name = "mypy", specifier = ">=2.4.1" },
-    { name = "pyaudio", specifier = ">=0.2.14" },
     { name = "pytest", specifier = ">=9.2.0" },
     { name = "ruff", specifier = ">=0.17.6" },
     { name = "websockets", specifier = ">=17.4" },
 ]
+voice = [{ name = "pyaudio", specifier = ">=0.2.14" }]
 
 [[package]]
 name = "starlette"

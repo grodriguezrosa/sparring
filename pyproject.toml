@@ -13,10 +13,14 @@ dependencies = [
 dev = [
     "elevenlabs>=2.79.0",
     "mypy>=2.4.1",
-    "pyaudio>=0.2.14",
     "pytest>=9.2.0",
     "ruff>=0.17.6",
     "websockets>=17.4",
+]
+# Microphone/speaker for scripts/voice_interview.py only. Not in `dev` because pyaudio
+# compiles against PortAudio (`brew install portaudio`), which CI runners do not have.
+voice = [
+    "pyaudio>=0.2.14",
 ]
 
 [tool.ruff]

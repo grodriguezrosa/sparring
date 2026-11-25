@@ -49,7 +49,7 @@ voice-dev:  ## Backend + tunnel + agent config, auto-stops (default 30 min): mak
 	uv run python -m scripts.dev_session --minutes $(or $(MINUTES),30)
 
 voice-interview:  ## Spoken interview (needs `make voice-dev` running; headphones): PLAN=backups/last-plan.json
-	uv run python -m scripts.voice_interview $(if $(PLAN),--plan $(PLAN))
+	uv run --group voice python -m scripts.voice_interview $(if $(PLAN),--plan $(PLAN))
 
 latency:  ## Per-turn latency of the agent's last conversations
 	uv run python -m scripts.latency_report

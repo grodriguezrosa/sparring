@@ -9,6 +9,8 @@ candidate actually gets. At the end it prints the latency report of this convers
 
 Use headphones: otherwise the microphone hears Mateo and he interrupts himself.
 macOS asks for microphone permission for your terminal the first time.
+Needs the `voice` dependency group (pyaudio): `brew install portaudio` once, and
+`make voice-interview` installs the rest.
 Ctrl+C ends the interview. Each run uses one conversation of the agent's daily limit.
 """
 
