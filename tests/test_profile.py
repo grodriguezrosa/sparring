@@ -47,7 +47,9 @@ class DownLLM:
     async def complete(self, *, system: str, user: str, json_mode: bool = False) -> str:
         raise LLMProviderError("DeepSeek is not answering")
 
-    async def stream(self, *, messages: Sequence[ChatMessage]) -> AsyncIterator[str]:
+    async def stream(
+        self, *, messages: Sequence[ChatMessage], reasoning: bool = False
+    ) -> AsyncIterator[str]:
         raise LLMProviderError("DeepSeek is not answering")
         yield ""  # never reached; the `yield` is what makes this an async generator
 

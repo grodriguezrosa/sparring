@@ -28,7 +28,9 @@ class FakeLLM:
             raise RuntimeError("FakeLLM ran out of canned responses")
         return self._responses.pop(0)
 
-    async def stream(self, *, messages: Sequence[ChatMessage]) -> AsyncIterator[str]:
+    async def stream(
+        self, *, messages: Sequence[ChatMessage], reasoning: bool = False
+    ) -> AsyncIterator[str]:
         self.stream_calls.append(list(messages))
         if not self._responses:
             raise RuntimeError("FakeLLM ran out of canned responses")

@@ -147,13 +147,17 @@ class DownLLM:
     async def complete(self, *, system: str, user: str, json_mode: bool = False) -> str:
         raise LLMProviderError("down")
 
-    async def stream(self, *, messages: Sequence[ChatMessage]) -> AsyncIterator[str]:
+    async def stream(
+        self, *, messages: Sequence[ChatMessage], reasoning: bool = False
+    ) -> AsyncIterator[str]:
         raise LLMProviderError("down")
         yield ""  # never reached; makes this an async generator
 
 
 class BreaksMidReplyLLM(DownLLM):
-    async def stream(self, *, messages: Sequence[ChatMessage]) -> AsyncIterator[str]:
+    async def stream(
+        self, *, messages: Sequence[ChatMessage], reasoning: bool = False
+    ) -> AsyncIterator[str]:
         yield "Perfecto, "
         raise LLMProviderError("connection lost")
 

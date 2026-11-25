@@ -1,6 +1,7 @@
 from functools import lru_cache
 from typing import Annotated
 
+import httpx
 from fastapi import Depends
 
 from app.config import Settings, get_settings
@@ -12,12 +13,26 @@ from app.voice.base import VoiceProvider
 from app.voice.elevenlabs import ElevenLabsVoice
 
 
-def get_llm(settings: Annotated[Settings, Depends(get_settings)]) -> LLMClient:
+@lru_cache
+def get_http_client() -> httpx.AsyncClient:
+    """One connection pool for the whole process, closed on shutdown (app/main.py).
+
+    Reusing connections saves a TLS handshake on every LLM call, which matters on every
+    turn of a voice interview.
+    """
+    return httpx.AsyncClient()
+
+
+def get_llm(
+    settings: Annotated[Settings, Depends(get_settings)],
+    http_client: Annotated[httpx.AsyncClient, Depends(get_http_client)],
+) -> LLMClient:
     """The LLM used by the endpoints. Tests replace it with FakeLLM."""
     return DeepSeekLLM(
         api_key=settings.deepseek_api_key,
         base_url=settings.deepseek_base_url,
         model=settings.deepseek_model,
+        http_client=http_client,
     )
 
 

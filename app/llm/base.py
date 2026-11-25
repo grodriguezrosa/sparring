@@ -25,10 +25,13 @@ class LLMClient(Protocol):
         """
         ...
 
-    def stream(self, *, messages: Sequence[ChatMessage]) -> AsyncIterator[str]:
+    def stream(
+        self, *, messages: Sequence[ChatMessage], reasoning: bool = False
+    ) -> AsyncIterator[str]:
         """Send a whole conversation and yield the reply text as it is generated.
 
-        Used where latency matters (the voice interviewer speaks while text arrives).
+        Used where latency matters (the voice interviewer speaks while text arrives), so
+        the model's step-by-step reasoning is off unless `reasoning=True`.
         Raises LLMProviderError if the provider fails, before or during the stream.
         """
         ...

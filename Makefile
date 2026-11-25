@@ -1,5 +1,5 @@
 # Project shortcuts. Usage: make <target>   (for example: make check)
-.PHONY: install dev lint format typecheck test test-live check preflight hooks tunnel agent-config interview
+.PHONY: install dev lint format typecheck test test-live check preflight hooks tunnel agent-config interview voice-dev voice-interview latency
 
 install:  ## Install the exact dependencies from uv.lock
 	uv sync
@@ -44,3 +44,12 @@ agent-config:  ## Point the ElevenLabs agent at the tunnel: make agent-config UR
 
 interview:  ## Typed interview through the real agent (uses 1 conversation of the daily limit)
 	uv run python -m scripts.text_interview
+
+voice-dev:  ## Backend + tunnel + agent config, auto-stops (default 30 min): make voice-dev MINUTES=45
+	uv run python -m scripts.dev_session --minutes $(or $(MINUTES),30)
+
+voice-interview:  ## Spoken interview (needs `make voice-dev` running; headphones): PLAN=backups/last-plan.json
+	uv run python -m scripts.voice_interview $(if $(PLAN),--plan $(PLAN))
+
+latency:  ## Per-turn latency of the agent's last conversations
+	uv run python -m scripts.latency_report

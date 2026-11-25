@@ -1,4 +1,5 @@
 from collections.abc import AsyncIterator, Sequence
+from contextlib import asynccontextmanager
 
 import httpx
 from pydantic import BaseModel, SecretStr, ValidationError
@@ -47,12 +48,24 @@ class DeepSeekLLM:
         model: str,
         timeout_s: float = 60.0,
         transport: httpx.AsyncBaseTransport | None = None,
+        http_client: httpx.AsyncClient | None = None,
     ) -> None:
         self._api_key = api_key
-        self._base_url = base_url
+        self._url = f"{base_url.rstrip('/')}/chat/completions"
         self._model = model
         self._timeout_s = timeout_s
         self._transport = transport  # tests only: lets us fake the server without network
+        # Shared connection pool (one per app): reusing an open connection saves the TLS
+        # handshake on every call. Without it, each call opens and closes its own client.
+        self._http_client = http_client
+
+    @asynccontextmanager
+    async def _client(self) -> AsyncIterator[httpx.AsyncClient]:
+        if self._http_client is not None:
+            yield self._http_client  # not ours to close: the app closes it on shutdown
+            return
+        async with httpx.AsyncClient(transport=self._transport) as client:
+            yield client
 
     async def complete(self, *, system: str, user: str, json_mode: bool = False) -> str:
         body: dict[str, object] = {
@@ -69,10 +82,10 @@ class DeepSeekLLM:
         headers = {"Authorization": f"Bearer {self._api_key.get_secret_value()}"}
 
         try:
-            async with httpx.AsyncClient(
-                base_url=self._base_url, timeout=self._timeout_s, transport=self._transport
-            ) as client:
-                response = await client.post("/chat/completions", json=body, headers=headers)
+            async with self._client() as client:
+                response = await client.post(
+                    self._url, json=body, headers=headers, timeout=self._timeout_s
+                )
                 response.raise_for_status()
         except httpx.HTTPStatusError as error:
             raise LLMProviderError(
@@ -92,20 +105,24 @@ class DeepSeekLLM:
             raise LLMProviderError("DeepSeek returned a response without choices")
         return data.choices[0].message.content or ""
 
-    async def stream(self, *, messages: Sequence[ChatMessage]) -> AsyncIterator[str]:
+    async def stream(
+        self, *, messages: Sequence[ChatMessage], reasoning: bool = False
+    ) -> AsyncIterator[str]:
         body = {
             "model": self._model,
             "messages": [{"role": m.role, "content": m.content} for m in messages],
             "stream": True,
+            # deepseek-flash thinks by default; for live turns that only adds latency.
+            "thinking": {"type": "enabled" if reasoning else "disabled"},
         }
         headers = {"Authorization": f"Bearer {self._api_key.get_secret_value()}"}
 
         try:
             async with (
-                httpx.AsyncClient(
-                    base_url=self._base_url, timeout=self._timeout_s, transport=self._transport
-                ) as client,
-                client.stream("POST", "/chat/completions", json=body, headers=headers) as response,
+                self._client() as client,
+                client.stream(
+                    "POST", self._url, json=body, headers=headers, timeout=self._timeout_s
+                ) as response,
             ):
                 if response.is_error:
                     raise LLMProviderError(f"DeepSeek returned HTTP error {response.status_code}")

@@ -120,6 +120,45 @@ async def test_malformed_chunk_gives_clear_error(bad_line: str) -> None:
         await collect(llm)
 
 
+async def test_thinking_is_off_by_default_to_cut_latency() -> None:
+    requests: list[httpx.Request] = []
+
+    def fake_server(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(200, content=sse(delta(content="Vale."), "data: [DONE]"))
+
+    llm = make_llm(httpx.MockTransport(fake_server))
+    await collect(llm)
+    [_ async for _ in llm.stream(messages=CONVERSATION, reasoning=True)]
+
+    assert json.loads(requests[0].content)["thinking"] == {"type": "disabled"}
+    assert json.loads(requests[1].content)["thinking"] == {"type": "enabled"}
+
+
+async def test_reuses_a_shared_http_client_without_closing_it() -> None:
+    requests: list[httpx.Request] = []
+
+    def fake_server(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(200, content=sse(delta(content="Vale."), "data: [DONE]"))
+
+    shared = httpx.AsyncClient(transport=httpx.MockTransport(fake_server))
+    llm = DeepSeekLLM(
+        api_key=SecretStr(FAKE_KEY),
+        base_url="https://api.deepseek.test",
+        model="deepseek-flash",
+        http_client=shared,
+    )
+
+    assert await collect(llm) == ["Vale."]
+    assert await collect(llm) == ["Vale."]
+
+    assert len(requests) == 2
+    assert str(requests[0].url) == "https://api.deepseek.test/chat/completions"
+    assert not shared.is_closed  # the pool belongs to the app, not to one call
+    await shared.aclose()
+
+
 # --- FakeLLM --------------------------------------------------------------------------
 
 
